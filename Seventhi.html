@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Resmi Kelas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Highlight visual saat mode admin aktif */
+        .admin-editing [contenteditable="true"] {
+            outline: 2px dashed #6366f1 !important;
+            outline-offset: 4px;
+            border-radius: 6px;
+            cursor: text;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body id="body-app" class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Admin Status Bar (Tampil hanya saat Admin Aktif) -->
+    <div id="admin-bar" class="hidden bg-indigo-600 text-white px-4 py-2 sticky top-0 z-50 text-xs font-semibold flex items-center justify-between shadow-lg">
+        <div class="flex items-center gap-2">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+            <span>Mode Admin Aktif: Klik langsung teks di layar untuk mengubahnya!</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="simpanPerubahanTeks()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-3 py-1 rounded-lg font-bold flex items-center gap-1 transition-all">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                <span>Simpan Teks</span>
+            </button>
+            <button onclick="logoutAdmin()" class="bg-slate-900 hover:bg-slate-800 text-rose-400 px-3 py-1 rounded-lg border border-rose-500/30">
+                Keluar Admin
+            </button>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-40 glass border-b border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-500/20">
+                        <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                    </div>
+                    <span id="nav-class-name" class="font-bold text-lg text-white tracking-wide">KELAS 8B</span>
+                </div>
+                <div>
+                    <button id="btn-login-trigger" onclick="toggleLoginModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium rounded-xl border border-slate-700 transition-all flex items-center gap-2">
+                        <i data-lucide="lock" class="w-4 h-4 text-indigo-400"></i>
+                        <span>Admin</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header / Hero Section -->
+    <header class="relative overflow-hidden py-12 sm:py-16">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent pointer-events-none"></div>
+        <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <span id="hero-tagline" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 inline-block mb-4">
+                Official Class Website
+            </span>
+            <h1 id="hero-title" class="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 mb-4 tracking-tight">
+                Selamat Datang di Website Kelas 8B
+            </h1>
+            <p id="hero-subtitle" class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto font-normal">
+                Wadah kebersamaan, galeri momen, dan ruang aspirasi anonim kita bersama.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14 pb-16">
+
+        <!-- 1. Struktur Organisasi Kelas -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Struktur Pengurus Kelas</h2>
+                </div>
+                <button id="btn-add-pengurus" onclick="tambahPengurusLayanan()" class="hidden px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> + Pengurus
+                </button>
+            </div>
+            <div id="struktur-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Data Struktur dimasukkan via JavaScript -->
+            </div>
+        </section>
+
+        <!-- 2. Galeri Foto Google Drive -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
+                        <i data-lucide="folder-git-2" class="w-5 h-5"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Dokumentasi & Galeri Momen</h2>
+                </div>
+                <button id="btn-add-galeri" onclick="tambahGaleriLayanan()" class="hidden px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> + Folder Drive
+                </button>
+            </div>
+            <div id="galeri-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Data Galeri dimasukkan via JavaScript -->
+            </div>
+        </section>
+
+        <!-- 3. Fitur NGL (Pesan Anonim) -->
+        <section class="max-w-2xl mx-auto space-y-10">
+            <!-- Form Kirim NGL -->
+            <div class="glass p-6 sm:p-8 rounded-3xl border border-slate-700/50 shadow-2xl relative overflow-hidden">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 bg-pink-500/10 text-pink-400 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-pink-500/20">
+                        <i data-lucide="message-square-plus" class="w-6 h-6"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">NGL Kelas (Kirim Pesan)</h2>
+                    <p class="text-slate-400 text-sm mt-1">Kirim pertanyaan atau curhatan secara anonim!</p>
+                </div>
+
+                <!-- Opsi Privasi NGL -->
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-slate-300 mb-2">Pilih Privasi Pesan:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="nglType" value="publik" checked class="peer sr-only">
+                            <div class="p-3 text-center rounded-xl border border-slate-700 bg-slate-800/50 peer-checked:border-indigo-500 peer-checked:bg-indigo-500/10 peer-checked:text-indigo-400 transition-all text-sm font-medium text-slate-400 flex items-center justify-center gap-2">
+                                <i data-lucide="globe" class="w-4 h-4"></i>
+                                <span>📢 Publik</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="nglType" value="privat" class="peer sr-only">
+                            <div class="p-3 text-center rounded-xl border border-slate-700 bg-slate-800/50 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 transition-all text-sm font-medium text-slate-400 flex items-center justify-center gap-2">
+                                <i data-lucide="lock" class="w-4 h-4"></i>
+                                <span>🔒 Privat (Admin)</span>
+                            </div>
+                        </label>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-2">
+                        *<strong>Publik</strong>: Pesan dibaca publik & dijawab oleh Admin.<br>
+                        *<strong>Privat</strong>: Pesan hanya dibaca & dijawab khusus oleh Admin (Rahasia).
+                    </p>
+                </div>
+
+                <textarea id="ngl-input" rows="4" placeholder="Tulis pesan rahasiamu di sini..." class="w-full bg-slate-900/80 border border-slate-700 rounded-2xl p-4 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm transition-all resize-none mb-4"></textarea>
+
+                <button onclick="kirimNgl()" class="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    <span>Kirim Pesan Sekarang</span>
+                </button>
+            </div>
+
+            <!-- Tampilan NGL Publik (Dapat Dilihat Semua Orang) -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="messages-square" class="w-5 h-5 text-indigo-400"></i>
+                    <span>Pesan NGL Publik</span>
+                </h3>
+                <div id="ngl-public-container" class="space-y-4">
+                    <!-- NGL Publik dimasukkan via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Tampilan NGL Privat (HANYA MUNCUL SAAT ADMIN LOGGED IN) -->
+            <div id="admin-ngl-privat-sec" class="hidden space-y-4 border-t border-amber-500/30 pt-6">
+                <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i data-lucide="lock" class="w-5 h-5 text-amber-400"></i>
+                    <span>Pesan NGL Privat (Khusus Admin)</span>
+                </h3>
+                <p class="text-xs text-slate-400">Pesan-pesan di bawah ini bersifat rahasia dan tidak dapat dilihat oleh pengunjung umum.</p>
+                <div id="ngl-privat-container" class="space-y-4">
+                    <!-- NGL Privat dimasukkan via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-6 text-center text-slate-500 text-sm">
+        <p>© 2026 <span id="footer-class-name">Website Kelas 8B</span>. All Rights Reserved.</p>
+    </footer>
+
+    <!-- MODAL SIMPLE LOGIN ADMIN -->
+    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass max-w-sm w-full rounded-3xl p-6 border border-slate-700 relative">
+            <button onclick="toggleLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="text-center mb-5">
+                <div class="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="key-round" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Akses Admin</h3>
+                <p class="text-xs text-slate-400">Masukkan kode sandi untuk mengedit langsung</p>
+            </div>
+            <div class="space-y-3">
+                <input type="password" id="admin-pass-input" placeholder="Password Admin (Default: admin123)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500">
+                <button onclick="loginAdmin()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-sm transition-all">
+                    Masuk
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const defaultData = {
+            adminPassword: "admin123",
+            config: {
+                className: "KELAS 8B",
+                heroTagline: "Official Class Website",
+                heroTitle: "Selamat Datang di Website Kelas 8B",
+                heroSubtitle: "Wadah kebersamaan, galeri momen, dan ruang aspirasi anonim kita bersama."
+            },
+            struktur: [
+                { id: 1, jabatan: "Wali Kelas", nama: "Ibu Nurhayati, S.Pd." },
+                { id: 2, jabatan: "Ketua Kelas", nama: "Ahmad Rizky" },
+                { id: 3, jabatan: "Wakil Ketua", nama: "Siti Rahma" }
+            ],
+            galeri: [
+                { id: 1, judul: "Foto Momen Classmeeting", link: "https://drive.google.com" },
+                { id: 2, judul: "Dokumentasi Kerja Kelompok", link: "https://drive.google.com" }
+            ],
+            ngl: [
+                { id: 1, type: "publik", pesan: "Semangat ya buat kelas 8B!", balasan: "Terima kasih banyak!", date: "2026-10-20" },
+                { id: 2, type: "privat", pesan: "Min, ada saran rahasia nih buat kelas.", balasan: "Siap, terima kasih sarannya!", date: "2026-10-22" }
+            ]
+        };
+
+        let isAdmin = false;
+
+        function loadData() {
+            return {
+                adminPassword: localStorage.getItem('class_adminPass') || defaultData.adminPassword,
+                config: JSON.parse(localStorage.getItem('class_config')) || defaultData.config,
+                struktur: JSON.parse(localStorage.getItem('class_struktur')) || defaultData.struktur,
+                galeri: JSON.parse(localStorage.getItem('class_galeri')) || defaultData.galeri,
+                ngl: JSON.parse(localStorage.getItem('class_ngl')) || defaultData.ngl
+            };
+        }
+
+        let appData = loadData();
+
+        function saveData() {
+            localStorage.setItem('class_adminPass', appData.adminPassword);
+            localStorage.setItem('class_config', JSON.stringify(appData.config));
+            localStorage.setItem('class_struktur', JSON.stringify(appData.struktur));
+            localStorage.setItem('class_galeri', JSON.stringify(appData.galeri));
+            localStorage.setItem('class_ngl', JSON.stringify(appData.ngl));
+            renderUI();
+        }
+
+        function renderUI() {
+            // Render Teks Utama
+            document.getElementById('nav-class-name').innerText = appData.config.className;
+            document.getElementById('hero-tagline').innerText = appData.config.heroTagline;
+            document.getElementById('hero-title').innerText = appData.config.heroTitle;
+            document.getElementById('hero-subtitle').innerText = appData.config.heroSubtitle;
+            document.getElementById('footer-class-name').innerText = appData.config.className;
+
+            // Render Struktur
+            const strukturContainer = document.getElementById('struktur-container');
+            strukturContainer.innerHTML = appData.struktur.map(s => `
+                <div class="glass-card p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl">
+                            <i data-lucide="user-check" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-medium" ${isAdmin ? `contenteditable="true" onblur="updatePengurus(${s.id}, 'jabatan', this.innerText)"` : ''}>${s.jabatan}</p>
+                            <h4 class="text-sm font-bold text-white" ${isAdmin ? `contenteditable="true" onblur="updatePengurus(${s.id}, 'nama', this.innerText)"` : ''}>${s.nama}</h4>
+                        </div>
+                    </div>
+                    ${isAdmin ? `<button onclick="hapusPengurus(${s.id})" class="text-rose-400 hover:text-rose-300 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}
+                </div>
+            `).join('');
+
+            // Render Galeri
+            const galeriContainer = document.getElementById('galeri-container');
+            galeriContainer.innerHTML = appData.galeri.map(g => `
+                <div class="glass-card p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
+                    <a href="${g.link}" target="_blank" class="flex items-center gap-3 flex-1">
+                        <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
+                            <i data-lucide="folder" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white" ${isAdmin ? `contenteditable="true" onclick="event.preventDefault()" onblur="updateGaleri(${g.id}, 'judul', this.innerText)"` : ''}>${g.judul}</h4>
+                            <p class="text-xs text-slate-400">Buka di Google Drive</p>
+                        </div>
+                    </a>
+                    ${isAdmin ? `<button onclick="hapusGaleri(${g.id})" class="text-rose-400 hover:text-rose-300 p-1 ml-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}
+                </div>
+            `).join('');
+
+            // Render NGL PUBLIK (Semua orang bisa baca pesan publik)
+            const nglPublicContainer = document.getElementById('ngl-public-container');
+            const publicList = appData.ngl.filter(n => n.type === 'publik');
+
+            if (publicList.length === 0) {
+                nglPublicContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Belum ada pesan publik.</p>`;
+            } else {
+                nglPublicContainer.innerHTML = publicList.map(n => `
+                    <div class="glass-card p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl mt-0.5">
+                                    <i data-lucide="globe" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-semibold text-indigo-400 uppercase">Pesan Publik</span>
+                                    <p class="text-sm text-slate-200 font-medium mt-0.5">"${n.pesan}"</p>
+                                </div>
+                            </div>
+                            ${isAdmin ? `<button onclick="hapusNgl(${n.id})" class="text-rose-400 hover:text-rose-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}
+                        </div>
+
+                        <!-- Balasan Admin -->
+                        <div class="pl-9 border-l-2 border-indigo-500/30 ml-2 space-y-1">
+                            <span class="text-[10px] font-semibold text-indigo-400 uppercase">Jawaban Admin</span>
+                            ${isAdmin ? `
+                                <div class="flex gap-2">
+                                    <input type="text" id="balas-pub-${n.id}" value="${n.balasan || ''}" placeholder="Tulis jawaban admin..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-xs">
+                                    <button onclick="jawabNgl(${n.id}, 'balas-pub-${n.id}')" class="px-3 py-1 bg-indigo-600 text-white text-xs rounded-lg font-semibold">Jawab</button>
+                                </div>
+                            ` : `
+                                <p class="text-xs ${n.balasan ? 'text-slate-300' : 'text-slate-500 italic'}">${n.balasan || 'Belum dijawab oleh admin.'}</p>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Render NGL PRIVAT (Hanya Muncul Jika Admin Logged In)
+            if (isAdmin) {
+                document.getElementById('admin-ngl-privat-sec').classList.remove('hidden');
+                const nglPrivatContainer = document.getElementById('ngl-privat-container');
+                const privatList = appData.ngl.filter(n => n.type === 'privat');
+
+                if (privatList.length === 0) {
+                    nglPrivatContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Tidak ada pesan privat masuk.</p>`;
+                } else {
+                    nglPrivatContainer.innerHTML = privatList.map(n => `
+                        <div class="glass-card p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-amber-500/5 space-y-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-2 bg-amber-500/10 text-amber-400 rounded-xl mt-0.5">
+                                        <i data-lucide="lock" class="w-4 h-4"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-semibold text-amber-400 uppercase">Pesan Privat (Rahasia)</span>
+                                        <p class="text-sm text-slate-200 font-medium mt-0.5">"${n.pesan}"</p>
+                                    </div>
+                                </div>
+                                <button onclick="hapusNgl(${n.id})" class="text-rose-400 hover:text-rose-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+
+                            <div class="pl-9 border-l-2 border-amber-500/30 ml-2 space-y-1">
+                                <span class="text-[10px] font-semibold text-amber-400 uppercase">Jawaban Admin (Privat)</span>
+                                <div class="flex gap-2">
+                                    <input type="text" id="balas-priv-${n.id}" value="${n.balasan || ''}" placeholder="Tulis jawaban rahasia..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-xs">
+                                    <button onclick="jawabNgl(${n.id}, 'balas-priv-${n.id}')" class="px-3 py-1 bg-amber-600 text-white text-xs rounded-lg font-semibold">Simpan</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } else {
+                document.getElementById('admin-ngl-privat-sec').classList.add('hidden');
+            }
+
+            lucide.createIcons();
+        }
+
+        // Kirim NGL Baru
+        function kirimNgl() {
+            const input = document.getElementById('ngl-input');
+            const type = document.querySelector('input[name="nglType"]:checked').value;
+            const pesanText = input.value.trim();
+
+            if (!pesanText) return alert("Silakan tulis pesan dulu!");
+
+            appData.ngl.unshift({
+                id: Date.now(),
+                type: type,
+                pesan: pesanText,
+                balasan: "",
+                date: new Date().toISOString().split('T')[0]
+            });
+
+            saveData();
+            input.value = "";
+
+            if (type === 'privat') {
+                alert("Pesan PRIVAT berhasil dikirim khusus ke Admin!");
+            } else {
+                alert("Pesan PUBLIK berhasil dikirim!");
+            }
+        }
+
+        // Admin Functions
+        function toggleLoginModal() {
+            document.getElementById('login-modal').classList.toggle('hidden');
+        }
+
+        function loginAdmin() {
+            const pass = document.getElementById('admin-pass-input').value;
+            if (pass === appData.adminPassword) {
+                isAdmin = true;
+                toggleLoginModal();
+                setAdminMode(true);
+            } else {
+                alert("Kata sandi salah!");
+            }
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            setAdminMode(false);
+        }
+
+        function setAdminMode(active) {
+            const body = document.getElementById('body-app');
+            const adminBar = document.getElementById('admin-bar');
+            const btnLogin = document.getElementById('btn-login-trigger');
+            const btnAddPengurus = document.getElementById('btn-add-pengurus');
+            const btnAddGaleri = document.getElementById('btn-add-galeri');
+
+            const editableElements = ['nav-class-name', 'hero-tagline', 'hero-title', 'hero-subtitle'];
+
+            if (active) {
+                body.classList.add('admin-editing');
+                adminBar.classList.remove('hidden');
+                btnLogin.classList.add('hidden');
+                btnAddPengurus.classList.remove('hidden');
+                btnAddGaleri.classList.remove('hidden');
+
+                editableElements.forEach(id => {
+                    document.getElementById(id).setAttribute('contenteditable', 'true');
+                });
+            } else {
+                body.classList.remove('admin-editing');
+                adminBar.classList.add('hidden');
+                btnLogin.classList.remove('hidden');
+                btnAddPengurus.classList.add('hidden');
+                btnAddGaleri.classList.add('hidden');
+
+                editableElements.forEach(id => {
+                    document.getElementById(id).removeAttribute('contenteditable');
+                });
+            }
+            renderUI();
+        }
+
+        function simpanPerubahanTeks() {
+            appData.config.className = document.getElementById('nav-class-name').innerText;
+            appData.config.heroTagline = document.getElementById('hero-tagline').innerText;
+            appData.config.heroTitle = document.getElementById('hero-title').innerText;
+            appData.config.heroSubtitle = document.getElementById('hero-subtitle').innerText;
+
+            saveData();
+            alert("Semua perubahan teks di halaman berhasil disimpan!");
+        }
+
+        function updatePengurus(id, key, val) {
+            const item = appData.struktur.find(s => s.id === id);
+            if (item) { item[key] = val; saveData(); }
+        }
+
+        function tambahPengurusLayanan() {
+            const jabatan = prompt("Masukkan Jabatan:");
+            const nama = prompt("Masukkan Nama Siswa:");
+            if (jabatan && nama) {
+                appData.struktur.push({ id: Date.now(), jabatan, nama });
+                saveData();
+            }
+        }
+
+        function hapusPengurus(id) {
+            if (confirm("Hapus pengurus ini?")) {
+                appData.struktur = appData.struktur.filter(s => s.id !== id);
+                saveData();
+            }
+        }
+
+        function updateGaleri(id, key, val) {
+            const item = appData.galeri.find(g => g.id === id);
+            if (item) { item[key] = val; saveData(); }
+        }
+
+        function tambahGaleriLayanan() {
+            const judul = prompt("Masukkan Judul Kegiatan:");
+            const link = prompt("Masukkan Link Google Drive:");
+            if (judul && link) {
+                appData.galeri.push({ id: Date.now(), judul, link });
+                saveData();
+            }
+        }
+
+        function hapusGaleri(id) {
+            if (confirm("Hapus folder galeri ini?")) {
+                appData.galeri = appData.galeri.filter(g => g.id !== id);
+                saveData();
+            }
+        }
+
+        function jawabNgl(id, inputId) {
+            const val = document.getElementById(inputId).value;
+            const item = appData.ngl.find(n => n.id === id);
+            if (item) {
+                item.balasan = val;
+                saveData();
+                alert("Jawaban disimpan!");
+            }
+        }
+
+        function hapusNgl(id) {
+            if (confirm("Hapus pesan ini?")) {
+                appData.ngl = appData.ngl.filter(n => n.id !== id);
+                saveData();
+            }
+        }
+
+        window.onload = () => renderUI();
+    </script>
+</body>
+</html>
